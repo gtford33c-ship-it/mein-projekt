@@ -1,53 +1,40 @@
-import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import bcrypt from "bcrypt";
-
-
-const adapter = new PrismaBetterSqlite3({
-  url: "./database.db",
-});
-
-
-const prisma = new PrismaClient({
-  adapter,
-});
-
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
 
 async function main() {
+  const email = "gtford33c@gmail.com";
+  const password = "admin123";
 
-  const password = await bcrypt.hash(
-    "Admin123!",
-    10
-  );
-
-
-  const admin = await prisma.user.create({
-
-    data: {
-
-      name: "Trini Hauptadmin",
-
-      email: "admin@trini.de",
-
-      password,
-
-      role: "SUPERADMIN"
-
-    }
-
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email,
+    },
   });
 
+  if (existingUser) {
+    console.log("Admin existiert bereits.");
+    return;
+  }
 
-  console.log("Admin erstellt:");
-  console.log(admin.email);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
+  const user = await prisma.user.create({
+    data: {
+      name: "Jonathan",
+      email,
+      password: hashedPassword,
+      role: "ADMIN",
+    },
+  });
+
+  console.log("Admin erstellt:", user.email);
 }
 
-
 main()
-.catch((error) => {
-  console.error(error);
-})
-.finally(async () => {
-  await prisma.$disconnect();
-});
+  .catch((error) => {
+    console.error("CREATE ADMIN ERROR:", error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

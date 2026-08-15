@@ -1,35 +1,21 @@
 import { NextResponse } from "next/server";
-
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "@/generated/prisma/client";
-
-const adapter = new PrismaBetterSqlite3({
-  url: "./database.db",
-});
-
-const prisma = new PrismaClient({
-  adapter,
-});
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
     const services = await prisma.service.findMany({
       orderBy: {
-        id: "asc",
+        createdAt: "asc",
       },
     });
 
     return NextResponse.json(services);
   } catch (error) {
-    console.error(error);
+    console.error("GET PUBLIC SERVICES ERROR:", error);
 
     return NextResponse.json(
-      {
-        error: "Fehler",
-      },
-      {
-        status: 500,
-      }
+      { error: "Failed to fetch services" },
+      { status: 500 }
     );
   }
 }

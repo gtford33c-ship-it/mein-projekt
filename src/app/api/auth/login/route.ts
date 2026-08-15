@@ -1,264 +1,58 @@
 import { NextResponse } from "next/server";
-
-import bcrypt from "bcrypt";
-
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-
-import { PrismaClient } from "@/generated/prisma/client";
-
-import { createLog } from "@/lib/createLog";
-
-
-
-const adapter = new PrismaBetterSqlite3({
-
-  url:"./database.db",
-
-});
-
-
-const prisma = new PrismaClient({
-
-  adapter,
-
-});
-
-
-
-
-
-
-
-export async function POST(request:Request){
-
-
-try{
-
-
-
-const body = await request.json();
-
-
-
-
-
-const user = await prisma.user.findUnique({
-
-where:{
-
-email:body.email,
-
-},
-
-});
-
-
-
-
-
-
-if(!user){
-
-
-return NextResponse.json(
-
-{
-
-error:"E-Mail oder Passwort falsch"
-
-},
-
-{
-
-status:401
-
-}
-
-);
-
-
-}
-
-
-
-
-
-
-
-const passwordCorrect = await bcrypt.compare(
-
-body.password,
-
-user.password
-
-);
-
-
-
-
-
-
-if(!passwordCorrect){
-
-
-await createLog(
-
-`Fehlgeschlagener Login: ${body.email}`
-
-);
-
-
-
-return NextResponse.json(
-
-{
-
-error:"E-Mail oder Passwort falsch"
-
-},
-
-{
-
-status:401
-
-}
-
-);
-
-
-}
-
-
-
-
-
-
-
-
-await createLog(
-
-`Login erfolgreich: ${user.email}`
-
-);
-
-
-
-
-
-
-
-const response = NextResponse.json({
-
-success:true,
-
-
-user:{
-
-
-id:user.id,
-
-
-name:user.name,
-
-
-email:user.email,
-
-
-role:user.role,
-
-
-}
-
-
-});
-
-
-
-
-
-
-
-response.cookies.set(
-
-"admin_session",
-
-JSON.stringify({
-
-id:user.id,
-
-email:user.email,
-
-role:user.role,
-
-}),
-
-
-{
-
-
-httpOnly:true,
-
-
-secure:false,
-
-
-sameSite:"lax",
-
-
-maxAge:60 * 60 * 24,
-
-
-path:"/",
-
-
-}
-
-
-
-);
-
-
-
-
-
-
-
-return response;
-
-
-
-
-
-
-
-
-}catch(error){
-
-
-console.error(error);
-
-
-
-return NextResponse.json(
-
-{
-
-error:"Server Fehler"
-
-},
-
-{
-
-status:500
-
-}
-
-);
-
-
-
-}
-
-
-
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+
+    const email = String(body.email ?? "").trim();
+    const password = String(body.password ?? "");
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "E-Mail und Passwort erforderlich" },
+        { status: 400 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Ungültige Zugangsdaten" },
+        { status: 401 }
+      );
+    }
+
+    const passwordValid = await bcrypt.compare(password, user.password);
+
+    if (!passwordValid) {
+      return NextResponse.json(
+        { error: "Ungültige Zugangsdaten" },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
+    return NextResponse.json(
+      { error: "Interner Serverfehler" },
+      { status: 500 }
+    );
+  }
 }
