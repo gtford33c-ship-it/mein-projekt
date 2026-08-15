@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+
+:root {
+
+  --background:#050505;
+  --foreground:#ffffff;
+
+}
+
+
+
+@theme inline {
+
+  --color-background:var(--background);
+
+  --color-foreground:var(--foreground);
+
+  --font-sans:var(--font-geist-sans);
+
+  --font-mono:var(--font-geist-mono);
+
+}
+
+
+
+
+
+* {
+
+  scroll-behavior:smooth;
+
+}
+
+
+
+html {
+
+  background:#050505;
+
+}
+
+
+
+body {
+
+  background:#050505;
+
+  color:white;
+
+  font-family:
+  Arial,
+  Helvetica,
+  sans-serif;
+
+  overflow-x:hidden;
+
+}
+
+
+
+
+
+
+
+/* Apple Style Reveal Animation */
+
+
+.reveal {
+
+  opacity:0;
+
+  transform:
+  translateY(80px);
+
+  transition:
+  opacity 1s ease,
+  transform 1s cubic-bezier(.2,.8,.2,1);
+
+}
+
+
+
+.reveal.show {
+
+  opacity:1;
+
+  transform:
+  translateY(0);
+
+}
+
+
+
+
+
+
+/* Glow Hintergrund */
+
+
+.glow {
+
+  position:absolute;
+
+  filter:blur(120px);
+
+  opacity:.4;
+
+  pointer-events:none;
+
+}
+
+
+
+
+
+
+/* Glas Effekt */
+
+
+.glass {
+
+  background:
+  rgba(255,255,255,.06);
+
+  backdrop-filter:
+  blur(30px);
+
+  border:
+  1px solid
+  rgba(255,255,255,.1);
+
+}
+
+
+
+
+
+
+/* Bilder */
+
+
+img {
+
+  user-select:none;
+
+}

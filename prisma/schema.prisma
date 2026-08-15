@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("ADMIN")
+
+  createdAt DateTime @default(now())
+}
+
+model SiteSettings {
+  id Int @id @default(autoincrement())
+
+  homeTitle    String @default("")
+  homeSubtitle String @default("")
+  homeImage    String @default("")
+
+  phone1 String @default("")
+  phone2 String @default("")
+  phone3 String @default("")
+
+  email String @default("")
+
+  addressLine1 String @default("")
+  addressLine2 String @default("")
+  addressLine3 String @default("")
+
+  openingHours String @default("")
+
+  instagramUrl String @default("")
+
+  impressumText  String @default("")
+  datenschutzText String @default("")
+
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id Int @id @default(autoincrement())
+
+  title String
+
+  description String @default("")
+
+  image String @default("")
+
+  createdAt DateTime @default(now())
+}
+
+model TeamMember {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  position String
+
+  image String @default("")
+
+  description String @default("")
+
+  createdAt DateTime @default(now())
+}
+
+model GalleryImage {
+  id Int @id @default(autoincrement())
+
+  image String
+
+  createdAt DateTime @default(now())
+}
+
+model Media {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  url String
+
+  createdAt DateTime @default(now())
+}
+
+model Log {
+  id Int @id @default(autoincrement())
+
+  action String
+
+  user String @default("Admin")
+
+  createdAt DateTime @default(now())
+}
